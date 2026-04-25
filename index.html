@@ -22,7 +22,7 @@
     async function submitWord() {
       const word = document.getElementById("wordInput").value;
 
-      const { error } = await supabase
+      const { error } = await client
         .from("words")
         .insert([
           { word: word, user_id: "test" }
