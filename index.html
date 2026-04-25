@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>GoobForge</title>
+  <title>One Word</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
   <script>
@@ -13,7 +13,9 @@
 </head>
 
 <body>
-  <h1>hi guys</h1>
+  <h1>ONE WORD AT A TIME SO FAR:</h1>
+
+  <ul id="wordList"></ul>
 
   <input type="text" id="wordInput" placeholder="Type a word" />
   <button onclick="submitWord()">Submit</button>
@@ -32,8 +34,35 @@
         console.log(error);
       } else {
         alert("Word added!");
+        document.getElementById("wordInput").value = "";
+        loadWords();
       }
     }
+  </script>
+
+  <script>
+    async function loadWords() {
+      const { data, error } = await client
+        .from("words")
+        .select("*")
+        .order("id", { ascending: false });
+
+      if (error) {
+        console.log(error);
+        return;
+      }
+
+      const list = document.getElementById("wordList");
+      list.innerHTML = "";
+
+      data.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item.word;
+        list.appendChild(li);
+      });
+    }
+
+    loadWords();
   </script>
 </body>
 </html>
