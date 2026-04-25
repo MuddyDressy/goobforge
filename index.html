@@ -3,14 +3,37 @@
 <head>
   <title>GoobForge</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
   <script>
-    const supabaseUrl = "https://mkomhjslpvgsdcvrqtrl.supabase.co/rest/v1/"
+    const supabaseUrl = "https://mkomhjslpvgsdcvrqtrl.supabase.co"
     const supabaseKey = "sb_publishable_bAD4YOSO75_r-gLXH0ucow_RXsLC249"
 
     const supabase = supabase.createClient(supabaseUrl, supabaseKey)
-</script>
+  </script>
 </head>
+
 <body>
   <h1>hi guys</h1>
+
+  <input type="text" id="wordInput" placeholder="Type a word" />
+  <button onclick="submitWord()">Submit</button>
+
+  <script>
+    async function submitWord() {
+      const word = document.getElementById("wordInput").value;
+
+      const { error } = await supabase
+        .from("words")
+        .insert([
+          { word: word, user_id: "test" }
+        ]);
+
+      if (error) {
+        console.log(error);
+      } else {
+        alert("Word added!");
+      }
+    }
+  </script>
 </body>
 </html>
