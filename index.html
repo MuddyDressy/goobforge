@@ -24,10 +24,13 @@
     async function submitWord() {
       const word = document.getElementById("wordInput").value;
 
+      // take ONLY first word
+      const firstWord = word.trim().split(" ")[0];
+
       const { error } = await client
         .from("words")
         .insert([
-          { word: word, user_id: "test" }
+          { word: firstWord, user_id: "test" }
         ]);
 
       if (error) {
@@ -52,13 +55,11 @@
 
       const container = document.getElementById("wordList");
 
-      // combine into single line (NOT list)
       container.innerHTML = data
         .map(item => item.word)
         .join(" ");
     }
 
-    // run AFTER page loads
     window.onload = loadWords;
   </script>
 </body>
