@@ -43,7 +43,7 @@
       const { data, error } = await client
         .from("words")
         .select("*")
-        .order("id", { ascending: false });
+        .order("id", { ascending: true });
 
       if (error) {
         console.log("LOAD ERROR:", error);
