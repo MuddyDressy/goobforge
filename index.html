@@ -16,9 +16,8 @@
       localStorage.setItem("userId", userId);
     }
 
-    const COOLDOWN_MS = 300000; // change if needed
+    const COOLDOWN_MS = 300000;
     let submitting = false;
-    let cooldownInterval = null;
   </script>
 
   <style>
@@ -52,48 +51,25 @@
       return `${seconds}s`;
     }
 
-    function updateCooldownUI(msLeft) {
+    function getRemainingCooldown() {
+      const lastTime = Number(localStorage.getItem("lastSubmitTime") || 0);
+      const now = Date.now();
+      return Math.max(0, COOLDOWN_MS - (now - lastTime));
+    }
+
+    function updateCooldownUI() {
+      const remaining = getRemainingCooldown();
       const el = document.getElementById("cooldownText");
 
-      if (msLeft <= 0) {
+      if (remaining <= 0) {
         el.textContent = "READY";
         return;
       }
 
-      el.textContent = "Cooldown: " + formatTime(msLeft);
+      el.textContent = "Cooldown: " + formatTime(remaining);
     }
 
-    function startCooldown() {
-      const start = Date.now();
-      const end = start + COOLDOWN_MS;
-
-      clearInterval(cooldownInterval);
-
-      cooldownInterval = setInterval(() => {
-        const remaining = end - Date.now();
-
-        if (remaining <= 0) {
-          clearInterval(cooldownInterval);
-          updateCooldownUI(0);
-          return;
-        }
-
-        updateCooldownUI(remaining);
-      }, 100);
-    }
-
-    function syncCooldownOnLoad() {
-      const lastTime = Number(localStorage.getItem("lastSubmitTime") || 0);
-      const now = Date.now();
-
-      const remaining = COOLDOWN_MS - (now - lastTime);
-
-      if (remaining > 0) {
-        startCooldown();
-      } else {
-        updateCooldownUI(0);
-      }
-    }
+    setInterval(updateCooldownUI, 200);
 
     async function submitWord() {
       if (submitting) return;
@@ -103,13 +79,10 @@
 
       const firstWord = word.split(" ")[0];
 
-      const lastTime = Number(localStorage.getItem("lastSubmitTime") || 0);
-      const now = Date.now();
+      const remaining = getRemainingCooldown();
 
-      const remaining = COOLDOWN_MS - (now - lastTime);
-
+      // block locally without affecting cooldown
       if (remaining > 0) {
-        startCooldown();
         return;
       }
 
@@ -125,17 +98,17 @@
             }
           ]);
 
+        // ❌ failed → do NOT touch cooldown
         if (error) {
           console.log("INSERT ERROR:", error);
           return;
         }
 
+        // ✔ success → start cooldown ONLY here
         localStorage.setItem("lastSubmitTime", Date.now());
 
         document.getElementById("wordInput").value = "";
         loadWords();
-
-        startCooldown();
 
       } finally {
         submitting = false;
@@ -156,7 +129,7 @@
 
     window.onload = () => {
       loadWords();
-      syncCooldownOnLoad();
+      updateCooldownUI();
     };
   </script>
 </body>
