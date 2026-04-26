@@ -10,10 +10,10 @@
 
     const client = supabase.createClient(supabaseUrl, supabaseKey)
 
-    let userId = localStorage.getItem("userId");
-    if (!userId) {
-      userId = crypto.randomUUID();
-      localStorage.setItem("userId", userId);
+    let userId_onewordatatime = localStorage.getItem("userId_onewordatatime");
+    if (!userId_onewordatatime) {
+      userId_onewordatatime = crypto.randomUUID();
+      localStorage.setItem("userId_onewordatatime", userId_onewordatatime);
     }
 
     const COOLDOWN_MS = 300000;
@@ -107,7 +107,7 @@
           .insert([
             {
               word: firstWord,
-              user_id: userId
+              user_id: userId_onewordatatime
             }
           ]);
 
