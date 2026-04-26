@@ -31,35 +31,37 @@
         ]);
 
       if (error) {
-        console.log(error);
+        console.log("INSERT ERROR:", error);
       } else {
         alert("Word added!");
         document.getElementById("wordInput").value = "";
         loadWords();
       }
     }
-  </script>
 
-  <script>
     async function loadWords() {
-  const { data, error } = await client
-    .from("words")
-    .select("*");
+      const { data, error } = await client
+        .from("words")
+        .select("*")
+        .order("id", { ascending: false });
 
-  console.log("DATA:", data);
-  console.log("ERROR:", error);
+      console.log("DATA:", data);
+      console.log("ERROR:", error);
 
-  const list = document.getElementById("wordList");
-  list.innerHTML = "";
+      if (error) return;
 
-  if (data) {
-    data.forEach(item => {
-      const li = document.createElement("li");
-      li.textContent = item.word;
-      list.appendChild(li);
-    });
-  }
-}
+      const list = document.getElementById("wordList");
+      list.innerHTML = "";
+
+      data.forEach(item => {
+        const li = document.createElement("li");
+        li.textContent = item.word;
+        list.appendChild(li);
+      });
+    }
+
+    // make sure it runs AFTER page loads
+    window.onload = loadWords;
   </script>
 </body>
 </html>
