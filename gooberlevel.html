@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Goober Levels Test</title>
+  <title>Goober Levels Debug</title>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
@@ -10,6 +10,8 @@
     const supabaseKey = "sb_publishable_bAD4YOSO75_r-gLXH0ucow_RXsLC249";
 
     const client = supabase.createClient(supabaseUrl, supabaseKey);
+
+    console.log("SCRIPT LOADED");
   </script>
 </head>
 
@@ -17,15 +19,15 @@
   <h1>Goober Levels Debug</h1>
 
   <script>
-    window.onload = async () => {
-      console.log("ONLOAD FIRED");
+    (async () => {
+      console.log("RUNNING TEST");
 
       const res = await client
         .from("gooberlevel")
         .select("*");
 
       console.log("SUPABASE RESPONSE:", res);
-    };
+    })();
   </script>
 </body>
 </html>
