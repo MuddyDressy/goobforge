@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <title>Goober Levels</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
   <script>
+    // user id system
     let userId = localStorage.getItem("userId");
-    
+
     if (!userId) {
       userId = crypto.randomUUID();
       localStorage.setItem("userId", userId);
     }
-    <title>Goober Levels</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-  </script>
-  <script>
+
+    // supabase setup
     const supabaseUrl = "https://mkomhjslpvgsdcvrqtrl.supabase.co";
     const supabaseKey = "sb_publishable_bAD4YOSO75_r-gLXH0ucow_RXsLC249";
 
@@ -20,16 +23,25 @@
 </head>
 
 <body>
+  <h1>Goober Levels</h1>
+
   <script>
     window.onload = async () => {
       await client
         .from("gooberlevel")
         .upsert(
-          [{ user_id: userId, gooberlevel: 1 }],
-          { onConflict: "user_id", ignoreDuplicates: true }
+          [
+            {
+              user_id: userId,
+              gooberlevel: 1
+            }
+          ],
+          {
+            onConflict: "user_id",
+            ignoreDuplicates: true
+          }
         );
     };
   </script>
-  <h1>Goober Levels</h1>
 </body>
 </html>
