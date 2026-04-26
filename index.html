@@ -10,7 +10,6 @@
 
     const client = supabase.createClient(supabaseUrl, supabaseKey)
 
-    // persistent user id
     let userId = localStorage.getItem("userId");
 
     if (!userId) {
@@ -34,41 +33,47 @@
   <script>
     async function submitWord() {
       if (submitting) return;
-      submitting = true;
 
-      const word = document.getElementById("wordInput").value;
-      const firstWord = word.trim().split(" ")[0];
+      const word = document.getElementById("wordInput").value.trim();
+      if (!word) return;
 
-      const lastTime = localStorage.getItem("lastSubmitTime");
+      const firstWord = word.split(" ")[0];
+
+      const lastTime = Number(localStorage.getItem("lastSubmitTime"));
       const now = Date.now();
 
+      // cooldown check (BEFORE submit)
       if (lastTime && now - lastTime < COOLDOWN_MS) {
-        alert("Wait a bit before sending another word!");
-        submitting = false;
+        console.log("Cooldown active");
         return;
       }
 
-      localStorage.setItem("lastSubmitTime", now);
+      submitting = true;
 
-      const { error } = await client
-        .from("words")
-        .insert([
-          {
-            word: firstWord,
-            user_id: userId
-          }
-        ]);
+      try {
+        const { error } = await client
+          .from("words")
+          .insert([
+            {
+              word: firstWord,
+              user_id: userId
+            }
+          ]);
 
-      if (error) {
-        console.log("INSERT ERROR:", error);
+        if (error) {
+          console.log("INSERT ERROR:", error);
+          return;
+        }
+
+        // ONLY set cooldown AFTER success
+        localStorage.setItem("lastSubmitTime", Date.now());
+
+        document.getElementById("wordInput").value = "";
+        loadWords();
+
+      } finally {
         submitting = false;
-        return;
       }
-
-      document.getElementById("wordInput").value = "";
-      loadWords();
-
-      submitting = false;
     }
 
     async function loadWords() {
@@ -77,16 +82,10 @@
         .select("*")
         .order("id", { ascending: true });
 
-      if (error) {
-        console.log("LOAD ERROR:", error);
-        return;
-      }
+      if (error) return;
 
-      const container = document.getElementById("wordList");
-
-      container.innerHTML = data
-        .map(item => item.word)
-        .join(" ");
+      document.getElementById("wordList").innerHTML =
+        data.map(item => item.word).join(" ");
     }
 
     window.onload = loadWords;
