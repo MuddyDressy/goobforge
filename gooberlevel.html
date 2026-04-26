@@ -1,15 +1,16 @@
 <!DOCTYPE html>
 <html>
 <head>
-  let userId = localStorage.getItem("userId");
-  
-  if (!userId) {
-    userId = crypto.randomUUID();
-    localStorage.setItem("userId", userId);
-  }
-  <title>Goober Levels</title>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
-
+  <script>
+    let userId = localStorage.getItem("userId");
+    
+    if (!userId) {
+      userId = crypto.randomUUID();
+      localStorage.setItem("userId", userId);
+    }
+    <title>Goober Levels</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  </script>
   <script>
     const supabaseUrl = "https://mkomhjslpvgsdcvrqtrl.supabase.co";
     const supabaseKey = "sb_publishable_bAD4YOSO75_r-gLXH0ucow_RXsLC249";
