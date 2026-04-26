@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>One Word</title>
+  <title>One Word at a time</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
   <script>
@@ -38,13 +38,14 @@
 <body>
   <h1>ONE WORD AT A TIME SO FAR:</h1>
 
-  <div id="contribText"></div>
   <div id="wordList" style="margin-bottom: 20px;"></div>
 
   <div id="cooldownText">READY</div>
 
   <input type="text" id="wordInput" placeholder="Type a word" />
   <button onclick="submitWord()">Submit</button>
+
+  <div id="contribText"></div>
 
   <script>
     function formatTime(ms) {
