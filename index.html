@@ -15,7 +15,7 @@
 <body>
   <h1>ONE WORD AT A TIME SO FAR:</h1>
 
-  <ul id="wordList"></ul>
+  <div id="wordList" style="margin-bottom: 20px;"></div>
 
   <input type="text" id="wordInput" placeholder="Type a word" />
   <button onclick="submitWord()">Submit</button>
@@ -32,11 +32,11 @@
 
       if (error) {
         console.log("INSERT ERROR:", error);
-      } else {
-        alert("Word added!");
-        document.getElementById("wordInput").value = "";
-        loadWords();
+        return;
       }
+
+      document.getElementById("wordInput").value = "";
+      loadWords();
     }
 
     async function loadWords() {
@@ -45,17 +45,20 @@
         .select("*")
         .order("id", { ascending: false });
 
-      console.log("DATA:", data);
-      console.log("ERROR:", error);
+      if (error) {
+        console.log("LOAD ERROR:", error);
+        return;
+      }
 
-      if (error) return;
+      const container = document.getElementById("wordList");
 
-      const list = document.getElementById("wordList");
-      list.innerHTML = "";
+      // combine into single line (NOT list)
+      container.innerHTML = data
+        .map(item => item.word)
+        .join(" ");
+    }
 
-      list.innerHTML = data.map(item => item.word).join(" ");
-
-    // make sure it runs AFTER page loads
+    // run AFTER page loads
     window.onload = loadWords;
   </script>
 </body>
