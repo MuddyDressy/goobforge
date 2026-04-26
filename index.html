@@ -9,6 +9,14 @@
     const supabaseKey = "sb_publishable_bAD4YOSO75_r-gLXH0ucow_RXsLC249"
 
     const client = supabase.createClient(supabaseUrl, supabaseKey)
+
+    // create or load persistent user id
+    let userId = localStorage.getItem("userId");
+
+    if (!userId) {
+      userId = crypto.randomUUID();
+      localStorage.setItem("userId", userId);
+    }
   </script>
 </head>
 
@@ -24,13 +32,16 @@
     async function submitWord() {
       const word = document.getElementById("wordInput").value;
 
-      // take ONLY first word
+      // only keep first word
       const firstWord = word.trim().split(" ")[0];
 
       const { error } = await client
         .from("words")
         .insert([
-          { word: firstWord, user_id: "test" }
+          {
+            word: firstWord,
+            user_id: userId
+          }
         ]);
 
       if (error) {
