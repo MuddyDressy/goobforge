@@ -17,6 +17,8 @@
       userId = crypto.randomUUID();
       localStorage.setItem("userId", userId);
     }
+
+    const COOLDOWN_MS = 3000; // 3 seconds cooldown
   </script>
 </head>
 
@@ -34,6 +36,17 @@
 
       // only keep first word
       const firstWord = word.trim().split(" ")[0];
+
+      // cooldown check
+      const lastTime = localStorage.getItem("lastSubmitTime");
+      const now = Date.now();
+
+      if (lastTime && now - lastTime < COOLDOWN_MS) {
+        alert("Wait a bit before sending another word!");
+        return;
+      }
+
+      localStorage.setItem("lastSubmitTime", now);
 
       const { error } = await client
         .from("words")
