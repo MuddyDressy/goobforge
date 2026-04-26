@@ -53,12 +53,7 @@
       const list = document.getElementById("wordList");
       list.innerHTML = "";
 
-      data.forEach(item => {
-        const li = document.createElement("li");
-        li.textContent = item.word;
-        list.appendChild(li);
-      });
-    }
+      list.innerHTML = data.map(item => item.word).join(" ");
 
     // make sure it runs AFTER page loads
     window.onload = loadWords;
