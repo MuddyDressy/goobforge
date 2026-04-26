@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>One Word at a time</title>
+  <title>One Word</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 
   <script>
@@ -18,6 +18,7 @@
 
     const COOLDOWN_MS = 300000;
     let submitting = false;
+    let cooldownInterval = null;
   </script>
 
   <style>
@@ -26,12 +27,18 @@
       font-size: 18px;
       font-weight: bold;
     }
+
+    #contribText {
+      margin: 10px 0;
+      opacity: 0.8;
+    }
   </style>
 </head>
 
 <body>
   <h1>ONE WORD AT A TIME SO FAR:</h1>
 
+  <div id="contribText"></div>
   <div id="wordList" style="margin-bottom: 20px;"></div>
 
   <div id="cooldownText">READY</div>
@@ -45,31 +52,41 @@
       const minutes = Math.floor(totalSeconds / 60);
       const seconds = totalSeconds % 60;
 
-      if (minutes > 0) {
-        return `${minutes}m ${seconds}s`;
-      }
+      if (minutes > 0) return `${minutes}m ${seconds}s`;
       return `${seconds}s`;
     }
 
     function getRemainingCooldown() {
       const lastTime = Number(localStorage.getItem("lastSubmitTime") || 0);
-      const now = Date.now();
-      return Math.max(0, COOLDOWN_MS - (now - lastTime));
+      return Math.max(0, COOLDOWN_MS - (Date.now() - lastTime));
     }
 
     function updateCooldownUI() {
       const remaining = getRemainingCooldown();
       const el = document.getElementById("cooldownText");
 
-      if (remaining <= 0) {
-        el.textContent = "READY";
-        return;
-      }
-
-      el.textContent = "Cooldown: " + formatTime(remaining);
+      el.textContent = remaining <= 0
+        ? "READY"
+        : "Cooldown: " + formatTime(remaining);
     }
 
     setInterval(updateCooldownUI, 200);
+
+    async function updateContributors() {
+      const { data, error } = await client
+        .from("words")
+        .select("user_id");
+
+      if (error) return;
+
+      const unique = new Set(data.map(x => x.user_id)).size;
+
+      const text = unique === 1
+        ? "1 goober has contributed to this chain"
+        : `${unique} goobers have contributed to this chain`;
+
+      document.getElementById("contribText").textContent = text;
+    }
 
     async function submitWord() {
       if (submitting) return;
@@ -79,12 +96,7 @@
 
       const firstWord = word.split(" ")[0];
 
-      const remaining = getRemainingCooldown();
-
-      // block locally without affecting cooldown
-      if (remaining > 0) {
-        return;
-      }
+      if (getRemainingCooldown() > 0) return;
 
       submitting = true;
 
@@ -98,17 +110,17 @@
             }
           ]);
 
-        // ❌ failed → do NOT touch cooldown
         if (error) {
           console.log("INSERT ERROR:", error);
           return;
         }
 
-        // ✔ success → start cooldown ONLY here
         localStorage.setItem("lastSubmitTime", Date.now());
 
         document.getElementById("wordInput").value = "";
+
         loadWords();
+        updateContributors();
 
       } finally {
         submitting = false;
@@ -129,6 +141,7 @@
 
     window.onload = () => {
       loadWords();
+      updateContributors();
       updateCooldownUI();
     };
   </script>
