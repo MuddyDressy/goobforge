@@ -16,8 +16,7 @@
       localStorage.setItem("userId", userId);
     }
 
-    const COOLDOWN_MS = 300000; // ⬅️ increased cooldown (5 minutes)
-
+    const COOLDOWN_MS = 300000; // change if needed
     let submitting = false;
     let cooldownInterval = null;
   </script>
@@ -25,8 +24,8 @@
   <style>
     #cooldownText {
       margin: 10px 0;
+      font-size: 18px;
       font-weight: bold;
-      color: #444;
     }
   </style>
 </head>
@@ -36,29 +35,64 @@
 
   <div id="wordList" style="margin-bottom: 20px;"></div>
 
-  <div id="cooldownText">Ready</div>
+  <div id="cooldownText">READY</div>
 
   <input type="text" id="wordInput" placeholder="Type a word" />
   <button onclick="submitWord()">Submit</button>
 
   <script>
-    function startCooldownUI() {
-      const display = document.getElementById("cooldownText");
-      const endTime = Date.now() + COOLDOWN_MS;
+    function formatTime(ms) {
+      const totalSeconds = Math.ceil(ms / 1000);
+      const minutes = Math.floor(totalSeconds / 60);
+      const seconds = totalSeconds % 60;
+
+      if (minutes > 0) {
+        return `${minutes}m ${seconds}s`;
+      }
+      return `${seconds}s`;
+    }
+
+    function updateCooldownUI(msLeft) {
+      const el = document.getElementById("cooldownText");
+
+      if (msLeft <= 0) {
+        el.textContent = "READY";
+        return;
+      }
+
+      el.textContent = "Cooldown: " + formatTime(msLeft);
+    }
+
+    function startCooldown() {
+      const start = Date.now();
+      const end = start + COOLDOWN_MS;
 
       clearInterval(cooldownInterval);
 
       cooldownInterval = setInterval(() => {
-        const remaining = endTime - Date.now();
+        const remaining = end - Date.now();
 
         if (remaining <= 0) {
-          display.textContent = "Ready";
           clearInterval(cooldownInterval);
+          updateCooldownUI(0);
           return;
         }
 
-        display.textContent = "Cooldown: " + Math.ceil(remaining / 1000) + "s";
+        updateCooldownUI(remaining);
       }, 100);
+    }
+
+    function syncCooldownOnLoad() {
+      const lastTime = Number(localStorage.getItem("lastSubmitTime") || 0);
+      const now = Date.now();
+
+      const remaining = COOLDOWN_MS - (now - lastTime);
+
+      if (remaining > 0) {
+        startCooldown();
+      } else {
+        updateCooldownUI(0);
+      }
     }
 
     async function submitWord() {
@@ -69,10 +103,13 @@
 
       const firstWord = word.split(" ")[0];
 
-      const lastTime = Number(localStorage.getItem("lastSubmitTime"));
+      const lastTime = Number(localStorage.getItem("lastSubmitTime") || 0);
       const now = Date.now();
 
-      if (lastTime && now - lastTime < COOLDOWN_MS) {
+      const remaining = COOLDOWN_MS - (now - lastTime);
+
+      if (remaining > 0) {
+        startCooldown();
         return;
       }
 
@@ -98,7 +135,7 @@
         document.getElementById("wordInput").value = "";
         loadWords();
 
-        startCooldownUI(); // ⬅️ show cooldown after success
+        startCooldown();
 
       } finally {
         submitting = false;
@@ -117,7 +154,10 @@
         data.map(item => item.word).join(" ");
     }
 
-    window.onload = loadWords;
+    window.onload = () => {
+      loadWords();
+      syncCooldownOnLoad();
+    };
   </script>
 </body>
 </html>
