@@ -10,7 +10,7 @@
 
     const client = supabase.createClient(supabaseUrl, supabaseKey)
 
-    // create or load persistent user id
+    // persistent user id
     let userId = localStorage.getItem("userId");
 
     if (!userId) {
@@ -18,7 +18,8 @@
       localStorage.setItem("userId", userId);
     }
 
-    const COOLDOWN_MS = 3000; // 3 seconds cooldown
+    const COOLDOWN_MS = 3000;
+    let submitting = false;
   </script>
 </head>
 
@@ -32,17 +33,18 @@
 
   <script>
     async function submitWord() {
-      const word = document.getElementById("wordInput").value;
+      if (submitting) return;
+      submitting = true;
 
-      // only keep first word
+      const word = document.getElementById("wordInput").value;
       const firstWord = word.trim().split(" ")[0];
 
-      // cooldown check
       const lastTime = localStorage.getItem("lastSubmitTime");
       const now = Date.now();
 
       if (lastTime && now - lastTime < COOLDOWN_MS) {
         alert("Wait a bit before sending another word!");
+        submitting = false;
         return;
       }
 
@@ -59,11 +61,14 @@
 
       if (error) {
         console.log("INSERT ERROR:", error);
+        submitting = false;
         return;
       }
 
       document.getElementById("wordInput").value = "";
       loadWords();
+
+      submitting = false;
     }
 
     async function loadWords() {
