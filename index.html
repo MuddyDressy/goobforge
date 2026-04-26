@@ -42,27 +42,24 @@
 
   <script>
     async function loadWords() {
-      const { data, error } = await client
-        .from("words")
-        .select("*")
-        .order("id", { ascending: false });
+  const { data, error } = await client
+    .from("words")
+    .select("*");
 
-      if (error) {
-        console.log(error);
-        return;
-      }
+  console.log("DATA:", data);
+  console.log("ERROR:", error);
 
-      const list = document.getElementById("wordList");
-      list.innerHTML = "";
+  const list = document.getElementById("wordList");
+  list.innerHTML = "";
 
-      data.forEach(item => {
-        const li = document.createElement("li");
-        li.textContent = item.word;
-        list.appendChild(li);
-      });
-    }
-
-    loadWords();
+  if (data) {
+    data.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item.word;
+      list.appendChild(li);
+    });
+  }
+}
   </script>
 </body>
 </html>
